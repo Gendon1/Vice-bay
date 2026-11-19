@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "coarena/gpt-6-luna",
+  "provider": {
+    "coarena": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Coarena",
+      "options": {
+        "baseURL": "https://coarena.ai/api/v1",
+        "apiKey": "{env:COARENA_API_KEY}"
+      },
+      "models": {
+        "gpt-6-luna": {"name": "GPT-6 Luna (free)", "limit": {"context": 128000, "output": 16384}},
+        "gemini-3-8-flash": {"name": "Gemini 3.8 Flash (free)", "limit": {"context": 128000, "output": 16384}},
+        "deepseek-v4-1-flash-1017": {"name": "DeepSeek V4.1 Flash (free)", "limit": {"context": 128000, "output": 16384}}
+      }
+    }
+  },
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@latest", "--isolated"],
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,5 @@
+makefun-wallet.json
+kit/
+.env
+node_modules/
+*.log

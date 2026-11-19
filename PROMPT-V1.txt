@@ -1,0 +1,27 @@
+Build Vice Bay, a top-down 2D open-world crime game, in this repo (/home/hatch/workspace/makefun-gta6). Replace Block Dodger. Keep the existing file structure and exports. Only edit game/index.html and game/src/config.js, input.js, main.js, random.js, render.js, shots.js, world.js. Do NOT change main.ts, vendor/makefun-game.ts, LICENSE, shots.json, BUILD-PLAN.md, kit/, or any file outside game/.
+
+Rules: plain Canvas 2D, ES modules only, no network, no external libraries, no Rockstar names/assets. Original city/story. All files must parse as ES modules. After editing, run: for f in game/src/*.js; do node --check "$f"; done
+
+Keep these exact exports:
+- config.js: FIELD, STEP, PLAYER, LIVES, PALETTE, FONT, BEST_KEY, plus WORLD {width:2400,height:1800}, CITY grid constants
+- input.js: createInput(target) returns {direction(), vector(), takeActions(), shootPressed, enterPressed} and ACTION_CONFIRM, ACTION_PAUSE. Keys: WASD/arrows move, E enter/exit car (one-shot), Space shoot (held), P/Escape pause, Space/Enter confirm.
+- world.js: createWorld(random) returns {state, reset, step}. state has player {x,y,angle,speed,inCar,carId,health}, cars[], traffic[], peds[], police[], bullets[], money, wanted, missionIndex, missionText, missionTimer, elapsed, score. step(dt, input, harmless) returns event flags. EVENT_HIT, EVENT_COIN, EVENT_OVER, EVENT_MISSION.
+- render.js: createRenderer(canvas) returns {draw(state, screen, best)}. SCREEN_TITLE, SCREEN_PLAY, SCREEN_PAUSED, SCREEN_OVER. Draw city roads/buildings/parks/water with sun-soaked palette, camera follows player, cars as coloured rounded rects with windows, player on foot as a person dot/figure, HUD top: money, health bar, wanted stars 0-5, mission tracker, minimap bottom-right 180x130 showing roads/player/cars/police/mission marker. Title panel: VICE BAY, story line, controls, best money. Pause and game over panels.
+- shots.js: stageShot(name, world) returns {screen, best}. start: reset, place player downtown on foot, step harmless 5s, return title screen. play: reset, put player in a car mid-city, spawn traffic/peds, set wanted 2, mission 1 active, step with simple driving autopilot 20s, return play screen (or over if dead). end: reset, set health 10, wanted 4, police chasing, step until game over or 60s, return over screen.
+- main.js: keep ?shot=start|play|end mechanism, paints twice, sets window.__shotReady. Keep fixed 1/60s loop, screens title/play/paused/over, visibilitychange pauses, save best money to localStorage under BEST_KEY. Camera is in render.js, main.js passes state. Announce via #status text.
+
+Game design, implement all in world.js + render.js:
+- City: grid roads every 300px, blocks with buildings (rects, varied heights/colours), 2 parks, a beach/water strip south. Roads are drivable, buildings block movement.
+- Player on foot: WASD moves 220 px/s, collision with buildings stops movement.
+- Cars: 8 parked cars + traffic. Near a car (within 60px) press E to enter (steal: wanted +1, money stays), press E again to exit. Driving: WASD, accel/brake, steering, top speed 420, simple friction, collide with buildings/traffic slows and damages health slightly.
+- Traffic: 10 cars drive along roads, turn at intersections, avoid player car loosely, despawn/respawn at edges.
+- Pedestrians: 14 walk on sidewalks, flee if car near, hitting one raises wanted +1 and health loss if on foot.
+- Wanted 0-5 stars: rises on steal (+1), hit ped (+1), shoot (+1 per 5 shots). Falls 1 star per 20s calm. Police: 0 cars at wanted 0, 1 at 1-2, 2 at 3, 3 at 4-5. Police chase player, ram, if touching player for 1s health -10. Wanted shown as stars.
+- Combat: Space shoots a bullet in facing/driving direction, range 400, hits traffic/police/peds, each hit +$10, police hit +wanted.
+- Money: start $50. Coins/cash pickups on streets +$25, mission rewards, shooting hits +$10. Score = money.
+- Missions, sequential, shown in HUD: 1 Getaway: drive to the yellow marker at the north docks, reward $200. 2 Pickup: on foot reach the green marker in the park, reward $150. 3 Lose the cops: wanted set to 3, reach the blue hideout marker, survive, reward $300. Reaching marker within 70px completes mission, advances index, shows message. After mission 3, show "Story complete - free roam" and keep playing.
+- Health 100, game over at 0. Save best money.
+- Sound: no audio files, use tiny WebAudio beeps only if simple, otherwise skip sound. Do not add audio files.
+- Visual polish: sun-soaked sky, warm road asphalt with lane dashes, building shadows, car headlights, muzzle flash, particles on hit, screen shake small on crash. Keep code readable, one job per file, named functions.
+
+Work file by file, in this order: config.js, input.js, world.js, render.js, shots.js, main.js, game/index.html. Edit, do not rewrite files you have not read. Read each file first. Keep each file under ~450 lines. At the end, run node --check on game/src/*.js and report files changed, line counts, and any check failures. Do not submit, do not create keys, do not run makefun submit.
